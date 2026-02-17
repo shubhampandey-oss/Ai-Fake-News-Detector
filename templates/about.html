@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Fake News Detection System</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 3rem 0;
+            color: white;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .tech-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 20px;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2rem 0;
+            color: rgba(255, 255, 255, 0.7);
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero-section">
+        <div class="container">
+            <a href="/" class="text-white text-decoration-none">
+                <i class="bi bi-arrow-left me-2"></i> Back to Analysis
+            </a>
+            <h1 class="mt-4 mb-2 fw-bold">About This System</h1>
+            <p class="lead mb-0">Understanding the technology behind fake news detection</p>
+        </div>
+    </section>
+
+    <div class="container py-5">
+        <!-- System Description -->
+        <div class="glass-card p-4 mb-4">
+            <h3 class="fw-bold mb-3">
+                <i class="bi bi-info-circle text-primary me-2"></i>
+                What is this system?
+            </h3>
+            <p class="lead">
+                An <strong>early-stage fake news detection and credibility assessment system</strong>
+                using linguistic analysis, semantic modeling, source reputation scoring,
+                and multi-source evidence aggregation.
+            </p>
+            <div class="alert alert-warning">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong>Important:</strong> This system performs <em>probabilistic credibility assessment</em>,
+                NOT absolute truth verification. Results should be interpreted as "likelihood of credibility"
+                based on available evidence.
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="glass-card p-4 mb-4">
+            <h3 class="fw-bold mb-4">
+                <i class="bi bi-stars text-primary me-2"></i>
+                Key Features
+            </h3>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="d-flex">
+                        <div class="feature-icon me-3" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                            <i class="bi bi-cpu"></i>
+                        </div>
+                        <div>
+                            <h5>ML-Based Classification</h5>
+                            <p class="text-muted mb-0">Multiple models (Logistic Regression, SVM, Random Forest, LSTM)
+                                trained locally to predict fake vs real news.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex">
+                        <div class="feature-icon me-3" style="background: linear-gradient(135deg, #11998e, #38ef7d);">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <div>
+                            <h5>Linguistic Analysis</h5>
+                            <p class="text-muted mb-0">Examines writing style, readability, sensational language use,
+                                and vocabulary patterns.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex">
+                        <div class="feature-icon me-3" style="background: linear-gradient(135deg, #eb3349, #f45c43);">
+                            <i class="bi bi-globe"></i>
+                        </div>
+                        <div>
+                            <h5>Source Credibility</h5>
+                            <p class="text-muted mb-0">Pre-compiled database of source reputation scores based on public
+                                credibility reports.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex">
+                        <div class="feature-icon me-3" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                            <i class="bi bi-diagram-3"></i>
+                        </div>
+                        <div>
+                            <h5>Evidence Aggregation</h5>
+                            <p class="text-muted mb-0">Combines multiple signals (model, source, evidence) for robust
+                                credibility scoring.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="glass-card p-4 mb-4">
+            <h3 class="fw-bold mb-4">
+                <i class="bi bi-code-slash text-primary me-2"></i>
+                Technology Stack
+            </h3>
+            <div class="mb-3">
+                <span class="tech-badge">Python</span>
+                <span class="tech-badge">NumPy</span>
+                <span class="tech-badge">Pandas</span>
+                <span class="tech-badge">scikit-learn</span>
+                <span class="tech-badge">PyTorch</span>
+                <span class="tech-badge">NLTK</span>
+                <span class="tech-badge">Gensim</span>
+                <span class="tech-badge">Flask</span>
+                <span class="tech-badge">Bootstrap</span>
+            </div>
+            <p class="text-muted mb-0">
+                All models are trained locally from scratch. No external AI APIs or pretrained models are used.
+            </p>
+        </div>
+
+        <!-- Limitations -->
+        <div class="glass-card p-4 mb-4">
+            <h3 class="fw-bold mb-3">
+                <i class="bi bi-exclamation-diamond text-warning me-2"></i>
+                Limitations
+            </h3>
+            <ul class="mb-0">
+                <li>Cannot verify facts against the internet in real-time</li>
+                <li>Source credibility is based on pre-compiled data, not dynamic assessment</li>
+                <li>Performance depends on training data quality and domain coverage</li>
+                <li>May not detect sophisticated disinformation campaigns</li>
+                <li>Should be used as one tool among many, not as sole arbiter of truth</li>
+            </ul>
+        </div>
+
+        <!-- Research Context -->
+        <div class="glass-card p-4">
+            <h3 class="fw-bold mb-3">
+                <i class="bi bi-mortarboard text-primary me-2"></i>
+                Research Context
+            </h3>
+            <p>
+                This system is designed as a <strong>B.Tech final-year / IEEE-style research project</strong>
+                demonstrating practical application of NLP and machine learning techniques for
+                media credibility assessment.
+            </p>
+            <p class="mb-0">
+                The approach combines multiple analysis dimensions: content-based features,
+                stylometric analysis, semantic embeddings, and source reputation—providing
+                a more robust assessment than single-method approaches.
+            </p>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">
+                Fake News Detection & Credibility Assessment System<br>
+                <a href="/" class="text-white">Return to Analysis</a>
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fake News Detection & Credibility Assessment</title>
+    <meta name="description"
+        content="Early-stage fake news detection system using linguistic analysis, semantic modeling, and source reputation scoring.">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --glass-bg: rgba(255, 255, 255, 0.95);
+            --glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .hero-section {
+            background: var(--primary-gradient);
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.3;
+        }
+
+        .hero-title {
+            font-weight: 700;
+            font-size: 2.5rem;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .hero-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-title {
+            font-weight: 600;
+            color: #1a1a2e;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title i {
+            font-size: 1.2rem;
+        }
+
+        .input-card textarea {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            resize: vertical;
+        }
+
+        .input-card textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+        .btn-analyze {
+            background: var(--primary-gradient);
+            border: none;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-analyze:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .btn-analyze:disabled {
+            opacity: 0.7;
+            transform: none;
+        }
+
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            gap: 0.5rem;
+        }
+
+        .result-badge.real {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .result-badge.fake {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .result-badge.uncertain {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #f5f5f5, #ffffff);
+            box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.1), -5px -5px 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .score-value {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .component-bar {
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
+            overflow: hidden;
+        }
+
+        .component-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .explanation-item {
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .word-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(102, 126, 234, 0.1);
+            color: #667eea;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin: 0.25rem;
+            font-weight: 500;
+        }
+
+        .source-trusted {
+            color: #11998e;
+        }
+
+        .source-unreliable {
+            color: #eb3349;
+        }
+
+        .disclaimer-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 12px;
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 26, 46, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #resultsSection {
+            display: none;
+        }
+
+        footer {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2rem 0;
+            margin-top: 3rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        footer a {
+            color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="loading-spinner mb-3"></div>
+            <p class="text-white">Analyzing article...</p>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="hero-title mb-3">
+                <i class="bi bi-shield-check me-2"></i>
+                Fake News Detection
+            </h1>
+            <p class="hero-subtitle mb-0">
+                Early-stage credibility assessment using linguistic analysis,
+                semantic modeling, and source reputation scoring.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container pb-5">
+        <!-- Input Section -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="glass-card p-4 input-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="section-title mb-0">
+                            <i class="bi bi-shield-check"></i>
+                            Credibility Check
+                        </h4>
+                        <!-- Tri-Mode Toggle -->
+                        <div class="btn-group" role="group" aria-label="Input mode">
+                            <button type="button" class="btn btn-sm btn-primary active" id="claimModeBtn"
+                                onclick="setInputMode('claim')">
+                                <i class="bi bi-question-circle me-1"></i>Verify Claim
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="urlModeBtn"
+                                onclick="setInputMode('url')">
+                                <i class="bi bi-link-45deg me-1"></i>Analyze URL
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="textModeBtn"
+                                onclick="setInputMode('text')">
+                                <i class="bi bi-file-text me-1"></i>Paste Text
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Claim Input (PRIMARY - Default) -->
+                    <div id="claimInputSection">
+                        <div class="mb-3">
+                            <label for="claimText" class="form-label fw-medium">
+                                <i class="bi bi-question-circle text-primary me-1"></i>Ask about a news claim or rumor
+                            </label>
+                            <input type="text" class="form-control" id="claimText"
+                                placeholder="Is Ajit Pawar dead in a plane crash?"
+                                style="border-radius: 12px; padding: 0.75rem; font-size: 1.1rem;">
+                            <small class="text-muted">
+                                Examples: "Did PM Modi resign?" • "Earthquake in Delhi today?" • "Is [viral rumor]
+                                true?"
+                            </small>
+                        </div>
+
+                        <div class="text-center">
+                            <button class="btn btn-analyze btn-lg" id="verifyClaimBtn" onclick="verifyClaim()">
+                                <i class="bi bi-shield-check me-2"></i>
+                                Verify Claim
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- URL Input -->
+                    <div id="urlInputSection" style="display: none;">
+                        <div class="mb-3">
+                            <label for="articleUrl" class="form-label fw-medium">
+                                <i class="bi bi-link-45deg text-primary me-1"></i>News Article URL
+                            </label>
+                            <input type="text" class="form-control" id="articleUrl"
+                                placeholder="https://www.thehindu.com/news/article123.html"
+                                style="border-radius: 12px; padding: 0.75rem; font-size: 1rem;">
+                            <small class="text-muted">Paste any news article link - we'll extract and analyze
+                                automatically</small>
+                        </div>
+
+                        <div class="text-center">
+                            <button class="btn btn-analyze btn-lg" id="analyzeUrlBtn" onclick="analyzeByUrl()">
+                                <i class="bi bi-search me-2"></i>
+                                Analyze Article
+                            </button>
+                        </div>
+
+                        <!-- Extraction Status Message -->
+                        <div id="extractionStatus" class="mt-3" style="display: none;">
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <span id="extractionMessage"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Text Input (Fallback - Hidden by default) -->
+                    <div id="textInputSection" style="display: none;">
+                        <div class="mb-3">
+                            <label for="articleText" class="form-label fw-medium">
+                                <i class="bi bi-file-text text-primary me-1"></i>Article Text
+                            </label>
+                            <textarea class="form-control" id="articleText" rows="6"
+                                placeholder="Paste the news article text here for analysis..."></textarea>
+                            <small class="text-muted">Use this when URL extraction fails or article is behind a
+                                paywall</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="sourceUrl" class="form-label fw-medium">Source URL (Optional)</label>
+                            <input type="text" class="form-control" id="sourceUrl"
+                                placeholder="https://example.com/article"
+                                style="border-radius: 12px; padding: 0.75rem;">
+                        </div>
+
+                        <div class="text-center">
+                            <button class="btn btn-analyze btn-lg" id="analyzeBtn" onclick="analyzeArticle()">
+                                <i class="bi bi-search me-2"></i>
+                                Analyze Credibility
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Claim Verification Results (shown for claims) -->
+        <div id="claimResultsSection" style="display: none;">
+            <div class="row justify-content-center mb-4">
+                <div class="col-lg-10">
+                    <div class="glass-card p-4">
+                        <h4 class="section-title mb-3">
+                            <i class="bi bi-clipboard-check"></i>
+                            Verification Result
+                        </h4>
+
+                        <!-- Verdict Banner -->
+                        <div id="verdictBanner" class="text-center p-4 mb-4" style="border-radius: 16px;">
+                            <h2 id="verdictText" class="mb-2"></h2>
+                            <div class="d-flex justify-content-center align-items-center gap-3">
+                                <span class="badge bg-secondary" id="confidenceBadge"></span>
+                                <span class="badge" id="regionBadge"></span>
+                            </div>
+                        </div>
+
+                        <!-- Explanation -->
+                        <div class="mb-4">
+                            <h5 class="fw-semibold"><i class="bi bi-lightbulb me-2"></i>Explanation</h5>
+                            <div id="claimExplanation" class="ps-3"></div>
+                        </div>
+
+                        <!-- Evidence Summary -->
+                        <div class="row mb-4">
+                            <div class="col-md-4 text-center">
+                                <div class="p-3" style="background: rgba(25, 135, 84, 0.1); border-radius: 12px;">
+                                    <h3 id="confirmCount" class="text-success mb-1">0</h3>
+                                    <small class="text-muted">Confirmations</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="p-3" style="background: rgba(220, 53, 69, 0.1); border-radius: 12px;">
+                                    <h3 id="contradictCount" class="text-danger mb-1">0</h3>
+                                    <small class="text-muted">Contradictions</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="p-3" style="background: rgba(108, 117, 125, 0.1); border-radius: 12px;">
+                                    <h3 id="partialCount" class="text-secondary mb-1">0</h3>
+                                    <small class="text-muted">Related Mentions</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Matching Articles -->
+                        <div id="matchingArticlesSection">
+                            <h5 class="fw-semibold mb-3"><i class="bi bi-newspaper me-2"></i>Evidence from News Sources
+                            </h5>
+                            <div id="matchingArticlesList" style="max-height: 400px; overflow-y: auto;"></div>
+                        </div>
+
+                        <!-- Disclaimer -->
+                        <div class="disclaimer-box mt-4">
+                            <div class="d-flex align-items-start">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
+                                <div>
+                                    <strong>Important:</strong>
+                                    <p class="mb-0" id="claimDisclaimer"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Live RSS Panel -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="glass-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="section-title mb-0">
+                            <i class="bi bi-rss"></i>
+                            Live News Feed
+                            <span class="badge bg-success ms-2" style="font-size: 0.7rem;">LIVE</span>
+                        </h4>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshRSSFeed()" id="refreshRssBtn">
+                            <i class="bi bi-arrow-clockwise me-1"></i>
+                            Refresh
+                        </button>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Real-time articles from trusted news sources. Click "Analyze" to check any article's
+                        credibility.
+                    </p>
+
+                    <div id="rssFeedContainer" style="max-height: 400px; overflow-y: auto;">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Loading live news...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <!-- Main Result Card -->
+                    <div class="glass-card p-4 mb-4 fade-in">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 text-center mb-3 mb-md-0">
+                                <div class="score-circle mx-auto" id="scoreCircle">
+                                    <span class="score-value" id="scoreValue">--</span>
+                                    <span class="score-label">Credibility</span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <h4 class="section-title mb-3">
+                                    <i class="bi bi-clipboard-check"></i>
+                                    Assessment Result
+                                </h4>
+                                <div class="mb-3">
+                                    <span class="result-badge" id="resultBadge">
+                                        <i class="bi bi-question-circle"></i>
+                                        Analyzing...
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-0" id="resultSummary">
+                                    Processing your article...
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detail Cards Row -->
+                    <div class="row">
+                        <!-- Score Components -->
+                        <div class="col-md-6 mb-4">
+                            <div class="glass-card p-4 h-100 fade-in">
+                                <h5 class="section-title mb-4">
+                                    <i class="bi bi-bar-chart"></i>
+                                    Score Components
+                                </h5>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Model Prediction</span>
+                                        <span id="modelScoreText">--</span>
+                                    </div>
+                                    <div class="component-bar">
+                                        <div class="component-bar-fill bg-primary" id="modelBar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Source Credibility</span>
+                                        <span id="sourceScoreText">--</span>
+                                    </div>
+                                    <div class="component-bar">
+                                        <div class="component-bar-fill bg-success" id="sourceBar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span>Evidence Agreement</span>
+                                        <span id="evidenceScoreText">--</span>
+                                    </div>
+                                    <div class="component-bar">
+                                        <div class="component-bar-fill bg-info" id="evidenceBar" style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Source Analysis -->
+                        <div class="col-md-6 mb-4">
+                            <div class="glass-card p-4 h-100 fade-in">
+                                <h5 class="section-title mb-4">
+                                    <i class="bi bi-globe"></i>
+                                    Source Analysis
+                                </h5>
+                                <div id="sourceAnalysis">
+                                    <p class="text-muted">No source provided</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Explanation -->
+                    <div class="glass-card p-4 mb-4 fade-in">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-lightbulb"></i>
+                            Explanation
+                        </h5>
+                        <div id="explanationList">
+                            <!-- Explanations will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Important Words -->
+                    <div class="glass-card p-4 mb-4 fade-in" id="wordsCard" style="display: none;">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-chat-quote"></i>
+                            Key Contributing Words
+                        </h5>
+                        <div id="importantWords">
+                            <!-- Words will be inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Evidence Comparison Section -->
+                    <div class="glass-card p-4 mb-4 fade-in" id="evidenceComparisonCard" style="display: none;">
+                        <h5 class="section-title mb-3">
+                            <i class="bi bi-intersect"></i>
+                            Cross-Source Evidence
+                            <span class="badge bg-info ms-2" style="font-size: 0.7rem;">Evidence Agreement</span>
+                        </h5>
+                        <p class="text-muted small mb-3">
+                            Similar articles found from trusted news sources for cross-source verification.
+                        </p>
+                        <div id="similarArticlesList">
+                            <!-- Similar articles will be inserted here -->
+                        </div>
+                        <div id="evidenceDetails" class="mt-3 p-3"
+                            style="background: rgba(0,0,0,0.02); border-radius: 8px;">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <small class="text-muted d-block">Trusted Source Match</small>
+                                    <span class="fs-5 fw-bold" id="trustedSimScore">0%</span>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <small class="text-muted d-block">Entity Overlap</small>
+                                    <span class="fs-5 fw-bold" id="entityOverlapScore">0%</span>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <small class="text-muted d-block">Evidence Score</small>
+                                    <span class="fs-5 fw-bold text-primary" id="finalEvidenceScore">50%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Disclaimer -->
+                    <div class="disclaimer-box fade-in">
+                        <div class="d-flex align-items-start">
+                            <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1"></i>
+                            <div>
+                                <strong>Important Disclaimer:</strong>
+                                <p class="mb-0" id="disclaimerText">
+                                    This is a probabilistic credibility assessment, not absolute truth verification.
+                                    Results should be interpreted as "likelihood of credibility" based on available
+                                    evidence.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center">
+            <p class="mb-2">
+                <strong>Fake News Detection & Credibility Assessment System</strong>
+            </p>
+            <p class="mb-0 small">
+                An early-stage detection system using linguistic analysis, semantic modeling,
+                source reputation scoring, and multi-source evidence aggregation.<br>
+                <a href="/about">Learn More</a>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        async function analyzeArticle() {
+            const text = document.getElementById('articleText').value.trim();
+            const source = document.getElementById('sourceUrl').value.trim();
+
+            if (!text) {
+                alert('Please enter article text to analyze.');
+                return;
+            }
+
+            if (text.length < 50) {
+                alert('Please enter at least 50 characters for accurate analysis.');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('analyzeBtn').disabled = true;
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, source })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                displayResults(data);
+
+            } catch (error) {
+                alert('An error occurred. Please try again.');
+                console.error(error);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        function displayResults(data) {
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+
+            // Update score circle
+            const score = Math.round(data.confidence_percentage);
+            const scoreValue = document.getElementById('scoreValue');
+            scoreValue.textContent = score + '%';
+
+            // Color based on score
+            const scoreCircle = document.getElementById('scoreCircle');
+            if (score >= 60) {
+                scoreValue.style.color = '#11998e';
+            } else if (score <= 40) {
+                scoreValue.style.color = '#eb3349';
+            } else {
+                scoreValue.style.color = '#f5576c';
+            }
+
+            // Update result badge
+            const badge = document.getElementById('resultBadge');
+            badge.className = 'result-badge';
+
+            if (data.final_prediction === 'LIKELY REAL') {
+                badge.className += ' real';
+                badge.innerHTML = '<i class="bi bi-check-circle-fill"></i> LIKELY REAL';
+            } else if (data.final_prediction === 'LIKELY FAKE') {
+                badge.className += ' fake';
+                badge.innerHTML = '<i class="bi bi-x-circle-fill"></i> LIKELY FAKE';
+            } else {
+                badge.className += ' uncertain';
+                badge.innerHTML = '<i class="bi bi-question-circle-fill"></i> UNCERTAIN';
+            }
+
+            // Update summary
+            document.getElementById('resultSummary').textContent =
+                `Based on analysis of ${data.text_length} words, our model predicts this article is ${data.model_prediction.toLowerCase()} with ${(data.model_confidence * 100).toFixed(1)}% confidence.`;
+
+            // Update component bars
+            if (data.components) {
+                const modelScore = data.components.model_score;
+                const sourceScore = data.components.source_score;
+                const evidenceScore = data.components.evidence_score;
+
+                document.getElementById('modelBar').style.width = (modelScore * 100) + '%';
+                document.getElementById('modelScoreText').textContent = (modelScore * 100).toFixed(1) + '%';
+
+                document.getElementById('sourceBar').style.width = (sourceScore * 100) + '%';
+                document.getElementById('sourceScoreText').textContent = (sourceScore * 100).toFixed(1) + '%';
+
+                document.getElementById('evidenceBar').style.width = (evidenceScore * 100) + '%';
+                document.getElementById('evidenceScoreText').textContent = (evidenceScore * 100).toFixed(1) + '%';
+            }
+
+            // Update source analysis
+            const sourceDiv = document.getElementById('sourceAnalysis');
+            if (data.source && data.source !== 'Unknown') {
+                let sourceHtml = `<p class="mb-2"><strong>Source:</strong> ${data.source}</p>`;
+                sourceHtml += `<p class="mb-2"><strong>Credibility Score:</strong> ${(data.source_credibility * 100).toFixed(1)}%</p>`;
+
+                if (data.source_trusted) {
+                    sourceHtml += `<p class="source-trusted mb-0"><i class="bi bi-check-circle-fill me-1"></i> Trusted Source</p>`;
+                } else if (data.source_unreliable) {
+                    sourceHtml += `<p class="source-unreliable mb-0"><i class="bi bi-x-circle-fill me-1"></i> Known Unreliable Source</p>`;
+                } else {
+                    sourceHtml += `<p class="text-muted mb-0"><i class="bi bi-question-circle me-1"></i> Unknown/Neutral Source</p>`;
+                }
+
+                if (data.source_explanation) {
+                    sourceHtml += `<p class="small text-muted mt-2 mb-0">${data.source_explanation}</p>`;
+                }
+
+                sourceDiv.innerHTML = sourceHtml;
+            } else {
+                sourceDiv.innerHTML = '<p class="text-muted mb-0">No source URL provided for analysis.</p>';
+            }
+
+            // Update explanations
+            const expList = document.getElementById('explanationList');
+            if (data.explanation && data.explanation.length > 0) {
+                expList.innerHTML = data.explanation.map(exp =>
+                    `<div class="explanation-item"><i class="bi bi-info-circle me-2"></i>${exp}</div>`
+                ).join('');
+            } else {
+                expList.innerHTML = '<p class="text-muted">No specific explanations available.</p>';
+            }
+
+            // Update important words
+            const wordsCard = document.getElementById('wordsCard');
+            const wordsDiv = document.getElementById('importantWords');
+
+            if (data.important_words && data.important_words.length > 0) {
+                wordsCard.style.display = 'block';
+                wordsDiv.innerHTML = data.important_words.map(w =>
+                    `<span class="word-tag">${w.word}</span>`
+                ).join('');
+            } else {
+                wordsCard.style.display = 'none';
+            }
+
+            // Update evidence comparison section
+            displayEvidenceComparison(data);
+
+            // Update disclaimer
+            if (data.disclaimer) {
+                document.getElementById('disclaimerText').textContent = data.disclaimer;
+            }
+
+            // Scroll to results
+            document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function displayEvidenceComparison(data) {
+            const evidenceCard = document.getElementById('evidenceComparisonCard');
+            const similarList = document.getElementById('similarArticlesList');
+
+            // Check if we have evidence details
+            if (data.evidence_details && data.evidence_details.similar_articles && data.evidence_details.similar_articles.length > 0) {
+                evidenceCard.style.display = 'block';
+
+                // Display similar articles
+                let articlesHtml = '';
+                data.evidence_details.similar_articles.forEach(article => {
+                    const similarity = (article.similarity * 100).toFixed(0);
+                    articlesHtml += `
+                        <div class="p-2 mb-2" style="background: rgba(0,0,0,0.02); border-radius: 8px; border-left: 3px solid #667eea;">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong class="d-block">${article.title || 'Untitled'}</strong>
+                                    <small class="text-muted">
+                                        <i class="bi bi-newspaper me-1"></i>${article.source || 'Unknown source'}
+                                        <span class="ms-2 badge bg-primary">${similarity}% match</span>
+                                    </small>
+                                </div>
+                                ${article.link ? `<a href="${article.link}" target="_blank" class="btn btn-sm btn-outline-secondary"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                similarList.innerHTML = articlesHtml;
+
+                // Update scores
+                document.getElementById('trustedSimScore').textContent =
+                    ((data.evidence_details.trusted_similarity || 0) * 100).toFixed(0) + '%';
+                document.getElementById('entityOverlapScore').textContent =
+                    ((data.evidence_details.entity_overlap || 0) * 100).toFixed(0) + '%';
+
+                if (data.components && data.components.evidence_score !== undefined) {
+                    document.getElementById('finalEvidenceScore').textContent =
+                        (data.components.evidence_score * 100).toFixed(0) + '%';
+                }
+            } else {
+                // No evidence data - show placeholder
+                evidenceCard.style.display = 'block';
+                similarList.innerHTML = '<p class="text-muted small">No similar articles found from trusted sources.</p>';
+                document.getElementById('trustedSimScore').textContent = '50%';
+                document.getElementById('entityOverlapScore').textContent = '0%';
+                document.getElementById('finalEvidenceScore').textContent = '50%';
+            }
+        }
+
+        // =================================================================
+        // RSS Feed Functions
+        // =================================================================
+
+        async function refreshRSSFeed() {
+            const container = document.getElementById('rssFeedContainer');
+            const btn = document.getElementById('refreshRssBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Loading...';
+
+            try {
+                const response = await fetch('/api/rss/live');
+                const data = await response.json();
+
+                if (data.error) {
+                    container.innerHTML = `<p class="text-danger text-center">${data.error}</p>`;
+                    return;
+                }
+
+                if (data.articles && data.articles.length > 0) {
+                    displayRSSArticles(data.articles);
+                } else {
+                    container.innerHTML = '<p class="text-muted text-center">No articles available. Try again later.</p>';
+                }
+            } catch (error) {
+                console.error('RSS fetch error:', error);
+                container.innerHTML = '<p class="text-muted text-center">Unable to load RSS feeds. The server may be offline.</p>';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Refresh';
+            }
+        }
+
+        function displayRSSArticles(articles) {
+            const container = document.getElementById('rssFeedContainer');
+
+            let html = '';
+            articles.forEach((article, index) => {
+                const sourceColor = getSourceColor(article.source);
+                html += `
+                    <div class="rss-article-item p-3 mb-2" style="background: rgba(0,0,0,0.02); border-radius: 10px; border-left: 4px solid ${sourceColor};">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1" style="font-size: 0.95rem;">${article.title}</h6>
+                                <p class="text-muted small mb-2" style="line-height: 1.4;">${article.summary}</p>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge" style="background: ${sourceColor};">${formatSourceName(article.source)}</span>
+                                    <small class="text-muted">${formatTimeAgo(article.published)}</small>
+                                </div>
+                            </div>
+                            <div class="ms-3 d-flex flex-column gap-2">
+                                <button class="btn btn-sm btn-primary" onclick="analyzeRSSArticle(${index})" title="Analyze this article">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                                ${article.link ? `<a href="${article.link}" target="_blank" class="btn btn-sm btn-outline-secondary" title="Read original"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+
+            // Store articles for later analysis
+            window.rssArticles = articles;
+        }
+
+        async function analyzeRSSArticle(index) {
+            if (!window.rssArticles || !window.rssArticles[index]) {
+                alert('Article not found');
+                return;
+            }
+
+            const article = window.rssArticles[index];
+
+            // Fill in the article text
+            document.getElementById('articleText').value = `${article.title}\n\n${article.summary}`;
+            document.getElementById('sourceUrl').value = article.link || article.source || '';
+
+            // Scroll to input and trigger analysis
+            document.querySelector('.input-card').scrollIntoView({ behavior: 'smooth' });
+
+            // Wait a moment then analyze
+            setTimeout(() => {
+                analyzeArticle();
+            }, 500);
+        }
+
+        function getSourceColor(source) {
+            const colors = {
+                'reuters': '#FF6B35',
+                'bbc': '#BB1919',
+                'ap_news': '#FF3300',
+                'npr': '#E42726',
+                'the_guardian': '#052962',
+                'nytimes': '#000000',
+                'washington_post': '#231F20',
+                'the_hindu': '#002855',
+                'indian_express': '#E91E63',
+                'ndtv': '#E31E24',
+                'times_of_india': '#FF5722',
+                'hindustan_times': '#1976D2'
+            };
+            return colors[source] || '#667eea';
+        }
+
+        function formatSourceName(source) {
+            const names = {
+                'reuters': 'Reuters',
+                'bbc': 'BBC',
+                'ap_news': 'AP News',
+                'npr': 'NPR',
+                'the_guardian': 'The Guardian',
+                'nytimes': 'NY Times',
+                'washington_post': 'Washington Post',
+                'the_hindu': 'The Hindu',
+                'indian_express': 'Indian Express',
+                'ndtv': 'NDTV',
+                'times_of_india': 'Times of India',
+                'hindustan_times': 'Hindustan Times'
+            };
+            return names[source] || source;
+        }
+
+        function formatTimeAgo(dateString) {
+            if (!dateString) return '';
+            try {
+                const date = new Date(dateString);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+
+                if (diffMins < 60) return `${diffMins}m ago`;
+                if (diffHours < 24) return `${diffHours}h ago`;
+                if (diffDays < 7) return `${diffDays}d ago`;
+                return date.toLocaleDateString();
+            } catch {
+                return dateString;
+            }
+        }
+
+        // Load RSS feed on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(refreshRSSFeed, 1000);
+        });
+
+        // =================================================================
+        // Tri-Mode Input Functions (Claim / URL / Text)
+        // =================================================================
+
+        let currentInputMode = 'claim';  // Default to Claim mode
+
+        function setInputMode(mode) {
+            currentInputMode = mode;
+            const claimSection = document.getElementById('claimInputSection');
+            const urlSection = document.getElementById('urlInputSection');
+            const textSection = document.getElementById('textInputSection');
+            const claimBtn = document.getElementById('claimModeBtn');
+            const urlBtn = document.getElementById('urlModeBtn');
+            const textBtn = document.getElementById('textModeBtn');
+
+            // Hide all sections
+            claimSection.style.display = 'none';
+            urlSection.style.display = 'none';
+            textSection.style.display = 'none';
+
+            // Reset all buttons
+            claimBtn.className = 'btn btn-sm btn-outline-primary';
+            urlBtn.className = 'btn btn-sm btn-outline-primary';
+            textBtn.className = 'btn btn-sm btn-outline-primary';
+
+            // Show selected section
+            if (mode === 'claim') {
+                claimSection.style.display = 'block';
+                claimBtn.className = 'btn btn-sm btn-primary active';
+            } else if (mode === 'url') {
+                urlSection.style.display = 'block';
+                urlBtn.className = 'btn btn-sm btn-primary active';
+            } else {
+                textSection.style.display = 'block';
+                textBtn.className = 'btn btn-sm btn-primary active';
+            }
+
+            // Clear extraction status
+            document.getElementById('extractionStatus').style.display = 'none';
+        }
+
+        // =================================================================
+        // Claim Verification Functions (PRIMARY)
+        // =================================================================
+
+        async function verifyClaim() {
+            const claim = document.getElementById('claimText').value.trim();
+
+            if (!claim) {
+                alert('Please enter a claim or question to verify.');
+                return;
+            }
+
+            if (claim.length < 5) {
+                alert('Please provide more details about the claim.');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('verifyClaimBtn').disabled = true;
+
+            // Hide previous results
+            document.getElementById('claimResultsSection').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/verify-claim', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ claim })
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                // Display claim verification results
+                displayClaimResults(data);
+
+            } catch (error) {
+                alert('An error occurred during verification. Please try again.');
+                console.error(error);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('verifyClaimBtn').disabled = false;
+            }
+        }
+
+        function displayClaimResults(data) {
+            // Show claim results section
+            document.getElementById('claimResultsSection').style.display = 'block';
+
+            // Update verdict banner
+            const verdictBanner = document.getElementById('verdictBanner');
+            const verdictText = document.getElementById('verdictText');
+            const confidenceBadge = document.getElementById('confidenceBadge');
+            const regionBadge = document.getElementById('regionBadge');
+
+            verdictText.textContent = data.verdict || 'UNKNOWN';
+            confidenceBadge.textContent = `${(data.confidence * 100).toFixed(0)}% confidence`;
+
+            // Style verdict banner based on verdict
+            const verdictColors = {
+                'LIKELY TRUE': { bg: 'rgba(25, 135, 84, 0.15)', text: '#198754', icon: '✓' },
+                'POSSIBLY TRUE': { bg: 'rgba(25, 135, 84, 0.1)', text: '#198754', icon: '?' },
+                'LIKELY FALSE': { bg: 'rgba(220, 53, 69, 0.15)', text: '#dc3545', icon: '✗' },
+                'UNVERIFIED': { bg: 'rgba(255, 193, 7, 0.15)', text: '#ffc107', icon: '?' },
+                'DISPUTED': { bg: 'rgba(102, 16, 242, 0.15)', text: '#6610f2', icon: '⚡' },
+                'INSUFFICIENT EVIDENCE': { bg: 'rgba(108, 117, 125, 0.15)', text: '#6c757d', icon: '○' }
+            };
+
+            const style = verdictColors[data.verdict] || verdictColors['UNVERIFIED'];
+            verdictBanner.style.background = style.bg;
+            verdictText.style.color = style.text;
+            verdictText.innerHTML = `${style.icon} ${data.verdict}`;
+
+            // Region badge
+            if (data.is_indian_context) {
+                regionBadge.className = 'badge bg-success';
+                regionBadge.innerHTML = '<i class="bi bi-geo-alt me-1"></i>Indian Context';
+            } else {
+                regionBadge.className = 'badge bg-info';
+                regionBadge.innerHTML = '<i class="bi bi-globe me-1"></i>Global';
+            }
+
+            // Update evidence counts
+            document.getElementById('confirmCount').textContent = data.evidence?.confirmations || 0;
+            document.getElementById('contradictCount').textContent = data.evidence?.contradictions || 0;
+            document.getElementById('partialCount').textContent = data.evidence?.partial_mentions || 0;
+
+            // Update explanation
+            const explanationDiv = document.getElementById('claimExplanation');
+            if (data.explanation && data.explanation.length > 0) {
+                explanationDiv.innerHTML = data.explanation.map(exp =>
+                    `<p class="mb-2"><i class="bi bi-info-circle text-primary me-2"></i>${exp}</p>`
+                ).join('');
+            } else {
+                explanationDiv.innerHTML = '<p class="text-muted">No specific explanation available.</p>';
+            }
+
+            // Update matching articles
+            const articlesList = document.getElementById('matchingArticlesList');
+            if (data.matching_articles && data.matching_articles.length > 0) {
+                let articlesHtml = '';
+                data.matching_articles.forEach(article => {
+                    const evidenceColor = {
+                        'CONFIRMATION': 'success',
+                        'CONTRADICTION': 'danger',
+                        'PARTIAL_MENTION': 'warning',
+                        'WEAK_MATCH': 'secondary'
+                    }[article.evidence_type] || 'secondary';
+
+                    const evidenceIcon = {
+                        'CONFIRMATION': 'check-circle-fill',
+                        'CONTRADICTION': 'x-circle-fill',
+                        'PARTIAL_MENTION': 'dash-circle',
+                        'WEAK_MATCH': 'circle'
+                    }[article.evidence_type] || 'circle';
+
+                    articlesHtml += `
+                        <div class="p-3 mb-2" style="background: rgba(0,0,0,0.02); border-radius: 10px; border-left: 4px solid var(--bs-${evidenceColor});">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong class="d-block">${article.title || 'Untitled'}</strong>
+                                    <small class="text-muted d-block mt-1">
+                                        <i class="bi bi-newspaper me-1"></i>${article.source || 'Unknown'} •
+                                        <span class="badge bg-${evidenceColor}">
+                                            <i class="bi bi-${evidenceIcon} me-1"></i>${article.evidence_type.replace('_', ' ')}
+                                        </span>
+                                        <span class="badge bg-secondary ms-1">${(article.relevance * 100).toFixed(0)}% match</span>
+                                    </small>
+                                    ${article.summary ? `<small class="text-muted d-block mt-1">${article.summary}</small>` : ''}
+                                </div>
+                                ${article.link ? `<a href="${article.link}" target="_blank" class="btn btn-sm btn-outline-secondary ms-2"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+                articlesList.innerHTML = articlesHtml;
+            } else {
+                articlesList.innerHTML = '<p class="text-muted text-center py-3">No matching articles found in RSS feeds.</p>';
+            }
+
+            // Update disclaimer
+            document.getElementById('claimDisclaimer').textContent = data.disclaimer ||
+                'This is a probabilistic assessment based on available RSS news sources. The system does not claim absolute truth.';
+
+            // Scroll to results
+            document.getElementById('claimResultsSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // =================================================================
+        // URL Analysis Functions
+        // =================================================================
+
+        async function analyzeByUrl() {
+            const url = document.getElementById('articleUrl').value.trim();
+
+            if (!url) {
+                alert('Please enter a news article URL.');
+                return;
+            }
+
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                alert('Please enter a valid URL starting with http:// or https://');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            document.getElementById('analyzeUrlBtn').disabled = true;
+
+            // Hide previous extraction status
+            document.getElementById('extractionStatus').style.display = 'none';
+
+            try {
+                const response = await fetch('/api/analyze-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url })
+                });
+
+                const data = await response.json();
+
+                // Check if extraction failed
+                if (data.fallback_required) {
+                    // Show extraction error and switch to text mode
+                    showExtractionError(data);
+                    return;
+                }
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
+                // Display results with source info
+                displayResults(data);
+                displaySourceInfo(data);
+
+            } catch (error) {
+                alert('An error occurred. Please try again or use manual text input.');
+                console.error(error);
+            } finally {
+                document.getElementById('loadingOverlay').style.display = 'none';
+                document.getElementById('analyzeUrlBtn').disabled = false;
+            }
+        }
+
+        function showExtractionError(data) {
+            const statusDiv = document.getElementById('extractionStatus');
+            const msgSpan = document.getElementById('extractionMessage');
+
+            let message = data.extraction_error || data.message || 'Could not extract article content.';
+
+            if (data.source_info) {
+                message += ` <br><small>Source detected: ${data.source_info.name || data.source_info.domain}</small>`;
+            }
+
+            message += ` <br><button class="btn btn-sm btn-primary mt-2" onclick="setInputMode('text')">
+                <i class="bi bi-file-text me-1"></i>Switch to Manual Input
+            </button>`;
+
+            msgSpan.innerHTML = message;
+            statusDiv.style.display = 'block';
+            statusDiv.querySelector('.alert').className = 'alert alert-warning mb-0';
+
+            document.getElementById('loadingOverlay').style.display = 'none';
+            document.getElementById('analyzeUrlBtn').disabled = false;
+        }
+
+        function displaySourceInfo(data) {
+            // Update source analysis section with extracted info
+            const sourceDiv = document.getElementById('sourceAnalysis');
+
+            if (data.source_info) {
+                let html = '';
+                html += `<p class="mb-2"><strong>Source:</strong> ${data.source_info.name}</p>`;
+                html += `<p class="mb-2"><strong>Domain:</strong> ${data.source_info.domain}</p>`;
+                html += `<p class="mb-2"><strong>Credibility Score:</strong> ${(data.source_info.credibility_score * 100).toFixed(1)}%</p>`;
+
+                // Region badge
+                const regionBadge = data.source_info.region === 'india'
+                    ? '<span class="badge bg-success"><i class="bi bi-geo-alt me-1"></i>India</span>'
+                    : '<span class="badge bg-info"><i class="bi bi-globe me-1"></i>Global</span>';
+                html += `<p class="mb-2"><strong>Region:</strong> ${regionBadge}</p>`;
+
+                if (data.source_info.is_trusted) {
+                    html += `<p class="source-trusted mb-0"><i class="bi bi-check-circle-fill me-1"></i> Trusted Source</p>`;
+                } else if (data.source_info.is_unreliable) {
+                    html += `<p class="source-unreliable mb-0"><i class="bi bi-x-circle-fill me-1"></i> Known Unreliable Source</p>`;
+                }
+
+                if (data.extraction_method) {
+                    html += `<p class="small text-muted mt-2 mb-0">
+                        <i class="bi bi-check-circle text-success me-1"></i>
+                        Article extracted successfully via ${data.extraction_method}
+                    </p>`;
+                }
+
+                if (data.extracted_title) {
+                    html += `<p class="small text-muted mt-1 mb-0"><strong>Title:</strong> ${data.extracted_title}</p>`;
+                }
+
+                sourceDiv.innerHTML = html;
+            }
+        }
+    </script>
+</body>
+
+</html>
